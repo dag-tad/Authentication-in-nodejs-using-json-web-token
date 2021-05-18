@@ -1,0 +1,74 @@
+using System;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+using Inventory.Api.Contracts.DTO;
+using Inventory.Api.Extensions;
+using Inventory.Api.Logging;
+using CAP.Common.Auth;
+using Inventory.Api.Domain.IssueRestockAggregate.Queries;
+using System.Collections.Generic;
+using Inventory.Api.Domain.IssueRestockAggregate.Validator;
+using FluentValidation;
+
+namespace Inventory.Api.Controllers
+{
+    [Route("v1/[controller]")]
+    public class IssueToRestockController : Controller
+    {
+        private static readonly ILogger Log = LogManager.CreateLogger(typeof(InventoryStockoutController).FullName);
+        private readonly GetIssueRestockAggregate _getIssueRestockRatioByCustomer;
+        private IssueToRestockAggregateValidator _issueToRestockAggregateValidator;
+
+        public IssueToRestockController(GetIssueRestockAggregate getIssueRestockRatioByCustomer, IssueToRestockAggregateValidator issueToRestockAggregateValidator)
+        {
+            _getIssueRestockRatioByCustomer = getIssueRestockRatioByCustomer;
+            _issueToRestockAggregateValidator = issueToRestockAggregateValidator;
+        }
+
+
+        [AuthorizeUser(RolesEnum.DirectorOfPharmacy, RolesEnum.NurseManager, RolesEnum.PharmAdminRole, RolesEnum.OmnicellSupport, RolesEnum.StrategistRole)]
+        [HttpGet]
+        [Route("average")]
+        public IActionResult GetRatio(string period)
+        {
+            List<string> validPeriod = new List<string>() { "30", "90", "180" };
+
+            AuthorizationToken token = null;
+            try
+            {
+                //int p = 0;
+                //if (!validPeriod.Contains(period) || !int.TryParse(period, out p))
+                //{
+                //    throw new Exception("Invalid period for issue to restock ratio.");
+                //}
+
+                _issueToRestockAggregateValidator.ValidateAndThrow(period);
+
+                token = this.GetAuthorizationToken();
+                var result = this._getIssueRestockRatioByCustomer.Execute(token.CurrentCustomerId, period);
+
+                if (result.Issues == 0 && result.Restocks == 0 && result.AvgIssuetoRestockRatio == 0)
+                {
+                    throw new Exception("Invalid period for issue to restock ratio.");
+                }
+                else
+                {
+                    return Ok(result);
+                }
+            }
+            catch (TokenOperationException e)
+            {
+                Log.LogError($"Failed to authorize request. Exception: {e}.");
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"Failed to get issuerestock ratio widget data for customer {token?.CurrentCustomerId}. Exception: {e}");
+                return NoContent();
+            }
+
+        }
+    }
+}

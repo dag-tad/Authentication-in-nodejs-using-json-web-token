@@ -1,0 +1,2 @@
+    "DbMigrationConnectionString": "User ID=inventory_dbuser;Password=awUzbyznoorzin1;Host=omnicell-inventory-dev-db.cyywdp2wxzem.us-west-2.rds.amazonaws.com;Port=5432;Database=inventory;Sslmode=Require;trustServerCertificate=true",
+    "ConnectionString": "User ID=inventory_dbuser_app;Password=ULE9ptam2kJ9zGL5;Host=omnicell-inventory-dev-db.cyywdp2wxzem.us-west-2.rds.amazonaws.com;Port=5432;Database=inventory;Sslmode=Require;trustServerCertificate=true;"
