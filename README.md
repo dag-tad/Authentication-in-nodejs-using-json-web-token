@@ -12,4 +12,4 @@ The project has the following parts
 2. model => to create each models schema
 3. controller => for bussiness logic handling
 4. middleware => to create different middleware
-5. const => to handle application level constants
+5. constants => to handle application level and error message constants
