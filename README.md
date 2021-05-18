@@ -5,7 +5,8 @@ Packages required for this project
 1. express
 2. mongoose
 3. jsonwebtoken
-4. cookie-parser
+4. bcrypt
+5. cookie-parser
 
 The project has the following parts
 1. Route => for route handling
